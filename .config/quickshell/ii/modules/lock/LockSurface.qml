@@ -226,30 +226,6 @@ MouseArea {
         scale: root.toolbarScale
         opacity: root.toolbarOpacity
 
-        RowLayout {
-            spacing: 6
-            Layout.fillHeight: true
-            Layout.leftMargin: 10
-            Layout.rightMargin: 10
-
-            MaterialSymbol {
-                id: boltIcon
-                Layout.alignment: Qt.AlignVCenter
-                Layout.leftMargin: -2
-                Layout.rightMargin: -2
-                fill: 1
-                text: Battery.isCharging ? "bolt" : "battery_android_full"
-                iconSize: Appearance.font.pixelSize.huge
-                animateChange: true
-                color: (Battery.isLow && !Battery.isCharging) ? Appearance.colors.colError : Appearance.colors.colOnSurfaceVariant
-            }
-            StyledText {
-                Layout.alignment: Qt.AlignVCenter
-                text: Math.round(Battery.percentage * 100)
-                color: (Battery.isLow && !Battery.isCharging) ? Appearance.colors.colError : Appearance.colors.colOnSurfaceVariant
-            }
-        }
-
         ToolbarButton {
             id: sleepButton
             implicitWidth: height

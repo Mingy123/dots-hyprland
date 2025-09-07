@@ -5,42 +5,50 @@ import qs.modules.common.widgets
 
 import QtQuick
 import QtQuick.Layouts
+import "../"
 
-Rectangle {
+StyledPopup {
     id: root
-    readonly property real margin: 10
-    implicitWidth: columnLayout.implicitWidth + margin * 2
-    implicitHeight: columnLayout.implicitHeight + margin * 2
-    color: Appearance.colors.colLayer0
-    radius: Appearance.rounding.small
-    border.width: 1
-    border.color: Appearance.colors.colLayer0Border
-    clip: true
 
     ColumnLayout {
         id: columnLayout
-        spacing: 5
-        anchors.centerIn: root
+        anchors.centerIn: parent
         implicitWidth: Math.max(header.implicitWidth, gridLayout.implicitWidth)
         implicitHeight: gridLayout.implicitHeight
+        spacing: 5
 
         // Header
-        RowLayout {
+        ColumnLayout {
             id: header
-            spacing: 5
-            Layout.fillWidth: parent
             Layout.alignment: Qt.AlignHCenter
-            MaterialSymbol {
-                fill: 0
-                text: "location_on"
-                iconSize: Appearance.font.pixelSize.huge
-            }
+            spacing: 2
 
+            RowLayout {
+                Layout.alignment: Qt.AlignHCenter
+                spacing: 6
+
+                MaterialSymbol {
+                    fill: 0
+                    font.weight: Font.Medium
+                    text: "location_on"
+                    iconSize: Appearance.font.pixelSize.large
+                    color: Appearance.colors.colOnSurfaceVariant
+                }
+
+                StyledText {
+                    text: Weather.data.city
+                    font {
+                        weight: Font.Medium
+                        pixelSize: Appearance.font.pixelSize.normal
+                    }
+                    color: Appearance.colors.colOnSurfaceVariant
+                }
+            }
             StyledText {
-                text: Weather.data.city
-                font.pixelSize: Appearance.font.pixelSize.title
-                font.family: Appearance.font.family.title
-                color: Appearance.colors.colOnLayer0
+                id: temp
+                font.pixelSize: Appearance.font.pixelSize.smaller
+                color: Appearance.colors.colOnSurfaceVariant
+                text: Weather.data.temp + " • " + Translation.tr("Feels like %1").arg(Weather.data.tempFeelsLike)
             }
         }
 

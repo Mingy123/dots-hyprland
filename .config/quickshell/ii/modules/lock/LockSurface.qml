@@ -1,10 +1,12 @@
 import QtQuick
 import QtQuick.Layouts
-import Qt5Compat.GraphicalEffects
+import qs
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
 import qs.modules.common.functions
+import qs.modules.bar as Bar
+import Quickshell.Services.SystemTray
 
 MouseArea {
     id: root
@@ -12,41 +14,54 @@ MouseArea {
     property bool active: false
     property bool showInputField: active || context.currentText.length > 0
 
+    // Force focus on entry
     function forceFieldFocus() {
         passwordBox.forceActiveFocus();
     }
-
-    Component.onCompleted: {
-        forceFieldFocus();
-    }
-
     Connections {
         target: context
         function onShouldReFocus() {
             forceFieldFocus();
         }
     }
+    hoverEnabled: true
+    acceptedButtons: Qt.LeftButton
+    onPressed: mouse => {
+        forceFieldFocus();
+    }
+    onPositionChanged: mouse => {
+        forceFieldFocus();
+    }
 
-    Keys.onPressed: (event) => { // Esc to clear
-        // console.log("KEY!!")
-        if (event.key === Qt.Key_Escape) {
-            root.context.currentText = ""
+    // Toolbar appearing animation
+    property real toolbarScale: 0.9
+    property real toolbarOpacity: 0
+    Behavior on toolbarScale {
+        NumberAnimation {
+            duration: Appearance.animation.elementMove.duration
+            easing.type: Appearance.animation.elementMove.type
+            easing.bezierCurve: Appearance.animationCurves.expressiveFastSpatial
+        }
+    }
+    Behavior on toolbarOpacity {
+        animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+    }
+
+    // Init
+    Component.onCompleted: {
+        forceFieldFocus();
+        toolbarScale = 1;
+        toolbarOpacity = 1;
+    }
+
+    // Key presses
+    Keys.onPressed: event => {
+        root.context.resetClearTimer();
+        if (event.key === Qt.Key_Escape) { // Esc to clear
+            root.context.currentText = "";
         }
         forceFieldFocus();
     }
-
-    hoverEnabled: true
-    acceptedButtons: Qt.LeftButton
-    onPressed: (mouse) => {
-        forceFieldFocus();
-        // console.log("Pressed")
-    }
-    onPositionChanged: (mouse) => {
-        forceFieldFocus();
-        // console.log(JSON.stringify(mouse))
-    }
-
-    anchors.fill: parent
 
     // RippleButton {
     //     anchors {
@@ -63,45 +78,28 @@ MouseArea {
     //     }
     // }
 
-    // Password entry
-    Rectangle {
-        id: passwordBoxContainer
+    // Main toolbar: password box
+    Toolbar {
+        id: mainIsland
         anchors {
             horizontalCenter: parent.horizontalCenter
             bottom: parent.bottom
-            bottomMargin: root.showInputField ? 20 : -height
+            bottomMargin: 20
         }
         Behavior on anchors.bottomMargin {
             animation: Appearance.animation.elementMove.numberAnimation.createObject(this)
         }
-        radius: Appearance.rounding.full
-        color: Appearance.colors.colLayer2
-        implicitWidth: 160
-        implicitHeight: 44
 
-        StyledText {
-            visible: root.context.showFailure && passwordBox.text.length == 0
-            anchors.centerIn: parent
-            text: "Incorrect"
-            color: Appearance.m3colors.m3error
-        }
+        scale: root.toolbarScale
+        opacity: root.toolbarOpacity
 
-        StyledTextInput {
+        ToolbarTextField {
             id: passwordBox
+            placeholderText: GlobalStates.screenUnlockFailed ? Translation.tr("Incorrect password") : Translation.tr("Enter password")
 
-            anchors {
-                fill: parent
-                margins: 10
-            }
+            // Style
             clip: true
-            horizontalAlignment: TextInput.AlignHCenter
-            verticalAlignment: TextInput.AlignVCenter
-            focus: true
-            onFocusChanged: root.forceFieldFocus();
-            color: Appearance.colors.colOnLayer2
-            font {
-                pixelSize: 10
-            }
+            font.pixelSize: Appearance.font.pixelSize.small
 
             // Password
             enabled: !root.context.unlockInProgress
@@ -117,31 +115,171 @@ MouseArea {
                     passwordBox.text = root.context.currentText;
                 }
             }
+
+            Keys.onPressed: event => {
+                root.context.resetClearTimer();
+            }
+        }
+
+        ToolbarButton {
+            id: confirmButton
+            implicitWidth: height
+            toggled: true
+            enabled: !root.context.unlockInProgress
+            colBackgroundToggled: Appearance.colors.colPrimary
+
+            onClicked: root.context.tryUnlock()
+
+            contentItem: MaterialSymbol {
+                anchors.centerIn: parent
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+                iconSize: 24
+                text: "arrow_right_alt"
+                color: confirmButton.enabled ? Appearance.colors.colOnPrimary : Appearance.colors.colSubtext
+            }
         }
     }
 
-    RippleButton {
+    // Left toolbar
+    Toolbar {
+        id: leftIsland
         anchors {
-            verticalCenter: passwordBoxContainer.verticalCenter
-            left: passwordBoxContainer.right
-            leftMargin: 5
+            right: mainIsland.left
+            top: mainIsland.top
+            bottom: mainIsland.bottom
+            rightMargin: 10
+        }
+        scale: root.toolbarScale
+        opacity: root.toolbarOpacity
+
+        // Username
+        RowLayout {
+            spacing: 6
+            Layout.leftMargin: 8
+            Layout.fillHeight: true
+
+            MaterialSymbol {
+                id: userIcon
+                Layout.alignment: Qt.AlignVCenter
+                fill: 1
+                text: "account_circle"
+                iconSize: Appearance.font.pixelSize.huge
+                color: Appearance.colors.colOnSurfaceVariant
+            }
+            StyledText {
+                Layout.alignment: Qt.AlignVCenter
+                text: SystemInfo.username
+                color: Appearance.colors.colOnSurfaceVariant
+            }
         }
 
-        visible: opacity > 0
-        implicitHeight: passwordBoxContainer.implicitHeight - 12
-        implicitWidth: implicitHeight
-        toggled: true
-        buttonRadius: passwordBoxContainer.radius
-        colBackground: Appearance.colors.colLayer2
-        onClicked: root.context.tryUnlock()
+        // Keyboard layout (Xkb)
+        Loader {
+            Layout.leftMargin: 8
+            Layout.rightMargin: 8
+            Layout.fillHeight: true
 
-        contentItem: MaterialSymbol {
-            anchors.centerIn: parent
-            horizontalAlignment: Text.AlignHCenter
-            verticalAlignment: Text.AlignVCenter
-            iconSize: 24
-            text: "arrow_right_alt"
-            color: Appearance.colors.colOnPrimary
+            active: true
+            visible: active
+
+            sourceComponent: RowLayout {
+                spacing: 8
+
+                MaterialSymbol {
+                    id: keyboardIcon
+                    Layout.alignment: Qt.AlignVCenter
+                    fill: 1
+                    text: "keyboard_alt"
+                    iconSize: Appearance.font.pixelSize.huge
+                    color: Appearance.colors.colOnSurfaceVariant
+                }
+                StyledText {
+                    text: HyprlandXkb.currentLayoutCode
+                    color: Appearance.colors.colOnSurfaceVariant
+                    animateChange: true
+                }
+            }
+        }
+
+        // Keyboard layout (Fcitx)
+        Bar.SysTray {
+            Layout.rightMargin: 10
+            Layout.alignment: Qt.AlignVCenter
+            showSeparator: false
+            showOverflowMenu: false
+            pinnedItems: SystemTray.items.values.filter(i => i.id == "Fcitx")
+            visible: pinnedItems.length > 0
+        }
+    }
+
+    // Right toolbar
+    Toolbar {
+        id: rightIsland
+        anchors {
+            left: mainIsland.right
+            top: mainIsland.top
+            bottom: mainIsland.bottom
+            leftMargin: 10
+        }
+
+        scale: root.toolbarScale
+        opacity: root.toolbarOpacity
+
+        RowLayout {
+            spacing: 6
+            Layout.fillHeight: true
+            Layout.leftMargin: 10
+            Layout.rightMargin: 10
+
+            MaterialSymbol {
+                id: boltIcon
+                Layout.alignment: Qt.AlignVCenter
+                Layout.leftMargin: -2
+                Layout.rightMargin: -2
+                fill: 1
+                text: Battery.isCharging ? "bolt" : "battery_android_full"
+                iconSize: Appearance.font.pixelSize.huge
+                animateChange: true
+                color: (Battery.isLow && !Battery.isCharging) ? Appearance.colors.colError : Appearance.colors.colOnSurfaceVariant
+            }
+            StyledText {
+                Layout.alignment: Qt.AlignVCenter
+                text: Math.round(Battery.percentage * 100)
+                color: (Battery.isLow && !Battery.isCharging) ? Appearance.colors.colError : Appearance.colors.colOnSurfaceVariant
+            }
+        }
+
+        ToolbarButton {
+            id: sleepButton
+            implicitWidth: height
+
+            onClicked: Session.suspend()
+
+            contentItem: MaterialSymbol {
+                anchors.centerIn: parent
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+                iconSize: 24
+                text: "dark_mode"
+                color: Appearance.colors.colOnSurfaceVariant
+            }
+        }
+
+        ToolbarButton {
+            id: powerButton
+            implicitWidth: height
+
+            onClicked: Session.poweroff()
+
+            contentItem: MaterialSymbol {
+                anchors.centerIn: parent
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+                iconSize: 24
+                text: "power_settings_new"
+                color: Appearance.colors.colOnSurfaceVariant
+            }
         }
     }
 }

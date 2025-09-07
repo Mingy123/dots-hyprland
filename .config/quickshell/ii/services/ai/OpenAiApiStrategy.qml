@@ -8,7 +8,7 @@ ApiStrategy {
         return model.endpoint;
     }
 
-    function buildRequestData(model: AiModel, messages, systemPrompt: string, temperature: real, tools: list<var>) {
+    function buildRequestData(model: AiModel, messages, systemPrompt: string, temperature: real, tools: list<var>, filePath: string) {
         let baseData = {
             "model": model.model,
             "messages": [
@@ -21,6 +21,7 @@ ApiStrategy {
                 }),
             ],
             "stream": true,
+            "tools": tools,
             "temperature": temperature,
         };
         return model.extraParams ? Object.assign({}, baseData, model.extraParams) : baseData;
@@ -36,6 +37,8 @@ ApiStrategy {
         if (cleanData.startsWith("data:")) {
             cleanData = cleanData.slice(5).trim();
         }
+
+        // console.log("[AI] OpenAI: Data:", cleanData);
         
         // Handle special cases
         if (!cleanData || cleanData.startsWith(":")) return {};
@@ -71,6 +74,17 @@ ApiStrategy {
 
             message.content += newContent;
             message.rawContent += newContent;
+
+            // Usage metadata
+            if (dataJson.usage) {
+                return {
+                    tokenUsage: {
+                        input: dataJson.usage.prompt_tokens ?? -1,
+                        output: dataJson.usage.completion_tokens ?? -1,
+                        total: dataJson.usage.total_tokens ?? -1
+                    }
+                };
+            }
 
             if (dataJson.done) {
                 return { finished: true };

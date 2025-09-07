@@ -21,7 +21,7 @@ Scope {
             required property var modelData
             property string searchingText: ""
             readonly property HyprlandMonitor monitor: Hyprland.monitorFor(root.screen)
-            property bool monitorIsFocused: (Hyprland.focusedMonitor?.id == monitor.id)
+            property bool monitorIsFocused: (Hyprland.focusedMonitor?.id == monitor?.id)
             screen: modelData
             visible: GlobalStates.overviewOpen
 
@@ -107,11 +107,6 @@ Scope {
                         if (!root.searchingText)
                             Hyprland.dispatch("workspace r+1");
                     }
-                }
-
-                Item {
-                    height: 1 // Prevent Wayland protocol error
-                    width: 1 // Prevent Wayland protocol error
                 }
 
                 SearchWidget {

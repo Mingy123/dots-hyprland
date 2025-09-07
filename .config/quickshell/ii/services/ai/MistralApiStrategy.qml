@@ -8,7 +8,7 @@ ApiStrategy {
         return model.endpoint;
     }
 
-    function buildRequestData(model: AiModel, messages, systemPrompt: string, temperature: real, tools: list<var>) {
+    function buildRequestData(model: AiModel, messages, systemPrompt: string, temperature: real, tools: list<var>, filePath: string) {
         let baseData = {
             "model": model.model,
             "messages": [
@@ -99,6 +99,17 @@ ApiStrategy {
             // Text
             message.content += newContent;
             message.rawContent += newContent;
+
+            // Usage metadata
+            if (dataJson.usage) {
+                return {
+                    tokenUsage: {
+                        input: dataJson.usage.prompt_tokens ?? -1,
+                        output: dataJson.usage.completion_tokens ?? -1,
+                        total: dataJson.usage.total_tokens ?? -1
+                    }
+                };
+            }
 
             if (`dataJson`.done) {
                 return { finished: true };

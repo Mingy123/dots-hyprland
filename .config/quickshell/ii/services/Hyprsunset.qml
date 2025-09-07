@@ -13,10 +13,10 @@ import Quickshell.Io
 Singleton {
     id: root
     property var manualActive
-    property string from: Config.options?.light?.night?.from ?? "19:00" // Default to 7 PM
-    property string to: Config.options?.light?.night?.to ?? "06:30" // Default to 6:30 AM
+    property string from: Config.options?.light?.night?.from ?? "19:00" 
+    property string to: Config.options?.light?.night?.to ?? "06:30"
     property bool automatic: Config.options?.light?.night?.automatic && (Config?.ready ?? true)
-    property int colorTemperature: Config.options?.light?.night?.colorTemperature ?? 5000 // Default color temperature
+    property int colorTemperature: Config.options?.light?.night?.colorTemperature ?? 5000
     property bool shouldBeOn
     property bool firstEvaluation: true
     property bool active: false
@@ -30,15 +30,6 @@ Singleton {
     property int clockMinute: DateTime.clock.minutes
 
 
-    function isNoLater(hour1, minute1, hour2, minute2) {
-        if (hour1 < hour2)
-            return true;
-        if (hour1 === hour2 && minute1 < minute2)
-            return true;
-        return false;
-    }
-
-
     onClockMinuteChanged: reEvaluate()
     onAutomaticChanged: {
         root.manualActive = undefined;
@@ -46,10 +37,16 @@ Singleton {
         reEvaluate();
     }
     function reEvaluate() {
-        const toHourIsNextDay = !isNoLater(fromHour, fromMinute, toHour, toMinute);
-        const toHourWrapped = toHourIsNextDay ? toHour + 24 : toHour;
-        const toMinuteWrapped = toMinute;
-        root.shouldBeOn = isNoLater(fromHour, fromMinute, clockHour, clockMinute) && isNoLater(clockHour, clockMinute, toHourWrapped, toMinuteWrapped);
+        const t = clockHour * 60 + clockMinute;
+        const from = fromHour * 60 + fromMinute;
+        const to = toHour * 60 + toMinute;
+
+        if (from < to) {
+            root.shouldBeOn = t >= from && t <= to;
+        } else {
+            // Wrapped around midnight
+            root.shouldBeOn = t >= from || t <= to;
+        }
         if (firstEvaluation) {
             firstEvaluation = false;
             root.ensureState();

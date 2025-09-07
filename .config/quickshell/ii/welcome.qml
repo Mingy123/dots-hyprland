@@ -12,7 +12,6 @@ import QtQuick.Layouts
 import QtQuick.Window
 import Quickshell
 import Quickshell.Io
-import Quickshell.Hyprland
 import qs
 import qs.services
 import qs.modules.common
@@ -26,16 +25,19 @@ ApplicationWindow {
     property real contentPadding: 8
     property bool showNextTime: false
     visible: true
-    onClosing: Qt.quit()
+    onClosing: {
+        Quickshell.execDetached(["notify-send", Translation.tr("Welcome app"), Translation.tr("Enjoy! You can reopen the welcome app any time with <tt>Super+Shift+Alt+/</tt>. To open the settings app, hit <tt>Super+I</tt>"), "-a", "Shell"]);
+        Qt.quit();
+    }
     title: Translation.tr("illogical-impulse Welcome")
 
     Component.onCompleted: {
-        MaterialThemeLoader.reapplyTheme()
+        MaterialThemeLoader.reapplyTheme();
     }
 
     minimumWidth: 600
     minimumHeight: 400
-    width: 800
+    width: 900
     height: 650
     color: Appearance.m3colors.m3background
 
@@ -57,7 +59,8 @@ ApplicationWindow {
             margins: contentPadding
         }
 
-        Item { // Titlebar
+        Item {
+            // Titlebar
             visible: Config.options?.windows.showTitlebar
             Layout.fillWidth: true
             implicitHeight: Math.max(welcomeText.implicitHeight, windowControlsRow.implicitHeight)
@@ -70,7 +73,7 @@ ApplicationWindow {
                     leftMargin: 12
                 }
                 color: Appearance.colors.colOnLayer0
-                text: Translation.tr("Yooooo hi there")
+                text: Translation.tr("Hi there! First things first...")
                 font.pixelSize: Appearance.font.pixelSize.title
                 font.family: Appearance.font.family.title
             }
@@ -89,9 +92,9 @@ ApplicationWindow {
                     Layout.alignment: Qt.AlignVCenter
                     onCheckedChanged: {
                         if (checked) {
-                            Quickshell.execDetached(["rm", root.firstRunFilePath])
+                            Quickshell.execDetached(["rm", root.firstRunFilePath]);
                         } else {
-                            Quickshell.execDetached(["bash", "-c", `echo '${StringUtils.shellSingleQuoteEscape(root.firstRunFileContent)}' > '${StringUtils.shellSingleQuoteEscape(root.firstRunFilePath)}'`])
+                            Quickshell.execDetached(["bash", "-c", `echo '${StringUtils.shellSingleQuoteEscape(root.firstRunFileContent)}' > '${StringUtils.shellSingleQuoteEscape(root.firstRunFilePath)}'`]);
                         }
                     }
                 }
@@ -109,41 +112,118 @@ ApplicationWindow {
                 }
             }
         }
-        Rectangle { // Content container
+
+        Rectangle {
+            // Content container
             color: Appearance.m3colors.m3surfaceContainerLow
             radius: Appearance.rounding.windowRounding - root.contentPadding
             implicitHeight: contentColumn.implicitHeight
             implicitWidth: contentColumn.implicitWidth
             Layout.fillWidth: true
             Layout.fillHeight: true
-            
 
             ContentPage {
                 id: contentColumn
                 anchors.fill: parent
 
                 ContentSection {
-                    title: Translation.tr("Bar style")
+                    Layout.fillWidth: true
+                    icon: "language"
+                    title: Translation.tr("Language")
 
                     ConfigSelectionArray {
-                        currentValue: Config.options.bar.cornerStyle
-                        configOptionName: "bar.cornerStyle"
-                        onSelected: (newValue) => {
-                            Config.options.bar.cornerStyle = newValue; // Update local copy
+                        id: languageSelector
+                        currentValue: Config.options.language.ui
+                        onSelected: newValue => {
+                            Config.options.language.ui = newValue;
                         }
                         options: [
-                            { displayName: Translation.tr("Hug"), value: 0 },
-                            { displayName: Translation.tr("Float"), value: 1 },
-                            { displayName: Translation.tr("Plain rectangle"), value: 2 }
-                        ]
+                            {
+                                displayName: Translation.tr("Auto (System)"),
+                                value: "auto"
+                            },
+                            ...Translation.availableLanguages.map(lang => {
+                                return {
+                                    displayName: lang.replace('_', '-'),
+                                    value: lang
+                                };
+                            })]
                     }
                 }
 
                 ContentSection {
+                    icon: "screenshot_monitor"
+                    title: Translation.tr("Bar")
+
+                    ConfigRow {
+                        ContentSubsection {
+                            title: Translation.tr("Bar position")
+                            ConfigSelectionArray {
+                                currentValue: (Config.options.bar.bottom ? 1 : 0) | (Config.options.bar.vertical ? 2 : 0)
+                                onSelected: newValue => {
+                                    Config.options.bar.bottom = (newValue & 1) !== 0;
+                                    Config.options.bar.vertical = (newValue & 2) !== 0;
+                                }
+                                options: [
+                                    {
+                                        displayName: Translation.tr("Top"),
+                                        icon: "arrow_upward",
+                                        value: 0 // bottom: false, vertical: false
+                                    },
+                                    {
+                                        displayName: Translation.tr("Left"),
+                                        icon: "arrow_back",
+                                        value: 2 // bottom: false, vertical: true
+                                    },
+                                    {
+                                        displayName: Translation.tr("Bottom"),
+                                        icon: "arrow_downward",
+                                        value: 1 // bottom: true, vertical: false
+                                    },
+                                    {
+                                        displayName: Translation.tr("Right"),
+                                        icon: "arrow_forward",
+                                        value: 3 // bottom: true, vertical: true
+                                    }
+                                ]
+                            }
+                        }
+                        ContentSubsection {
+                            title: Translation.tr("Bar style")
+
+                            ConfigSelectionArray {
+                                currentValue: Config.options.bar.cornerStyle
+                                onSelected: newValue => {
+                                    Config.options.bar.cornerStyle = newValue; // Update local copy
+                                }
+                                options: [
+                                    {
+                                        displayName: Translation.tr("Hug"),
+                                        icon: "line_curve",
+                                        value: 0
+                                    },
+                                    {
+                                        displayName: Translation.tr("Float"),
+                                        icon: "page_header",
+                                        value: 1
+                                    },
+                                    {
+                                        displayName: Translation.tr("Rect"),
+                                        icon: "toolbar",
+                                        value: 2
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                }
+
+                ContentSection {
+                    icon: "format_paint"
                     title: Translation.tr("Style & wallpaper")
 
                     ButtonGroup {
-                        Layout.fillWidth: true
+                        Layout.alignment: Qt.AlignHCenter
                         LightDarkPreferenceButton {
                             dark: false
                         }
@@ -156,12 +236,13 @@ ApplicationWindow {
                         Layout.alignment: Qt.AlignHCenter
                         RippleButtonWithIcon {
                             id: rndWallBtn
+                            visible: Config.options.policies.weeb === 1
                             Layout.alignment: Qt.AlignHCenter
                             buttonRadius: Appearance.rounding.small
                             materialIcon: "wallpaper"
                             mainText: konachanWallProc.running ? Translation.tr("Be patient...") : Translation.tr("Random: Konachan")
                             onClicked: {
-                                console.log(konachanWallProc.command.join(" "))
+                                console.log(konachanWallProc.command.join(" "));
                                 konachanWallProc.running = true;
                             }
                             StyledToolTip {
@@ -174,7 +255,7 @@ ApplicationWindow {
                                 content: Translation.tr("Pick wallpaper image on your system")
                             }
                             onClicked: {
-                                Quickshell.execDetached([`${Directories.wallpaperSwitchScriptPath}`])
+                                Quickshell.execDetached([`${Directories.wallpaperSwitchScriptPath}`]);
                             }
                             mainContentComponent: Component {
                                 RowLayout {
@@ -205,50 +286,65 @@ ApplicationWindow {
                         }
                     }
 
-                    StyledText {
-                        Layout.alignment: Qt.AlignHCenter
-                        text: Translation.tr("Change any time later with /dark, /light, /img in the launcher")
-                        font.pixelSize: Appearance.font.pixelSize.smaller
-                        color: Appearance.colors.colSubtext
+                    NoticeBox {
+                        Layout.fillWidth: true
+                        text: Translation.tr("Change any time later with /dark, /light, /wallpaper in the launcher\nIf the shell's colors aren't changing:\n    1. Open the right sidebar with Super+N\n    2. Click \"Reload Hyprland & Quickshell\" in the top-right corner")
                     }
                 }
 
                 ContentSection {
+                    icon: "rule"
                     title: Translation.tr("Policies")
 
                     ConfigRow {
-                        ColumnLayout { // Weeb policy
-                            ContentSubsectionLabel {
-                                text: Translation.tr("Weeb")
-                            }
+                        Layout.fillWidth: true
+
+                        ContentSubsection {
+                            title: "Weeb"
+
                             ConfigSelectionArray {
                                 currentValue: Config.options.policies.weeb
-                                configOptionName: "policies.weeb"
-                                onSelected: (newValue) => {
+                                onSelected: newValue => {
                                     Config.options.policies.weeb = newValue;
                                 }
                                 options: [
-                                    { displayName: Translation.tr("No"), value: 0 },
-                                    { displayName: Translation.tr("Yes"), value: 1 },
-                                    { displayName: Translation.tr("Closet"), value: 2 }
+                                    {
+                                        displayName: Translation.tr("No"),
+                                        value: 0
+                                    },
+                                    {
+                                        displayName: Translation.tr("Yes"),
+                                        value: 1
+                                    },
+                                    {
+                                        displayName: Translation.tr("Closet"),
+                                        value: 2
+                                    }
                                 ]
                             }
                         }
 
-                        ColumnLayout { // AI policy
-                            ContentSubsectionLabel {
-                                text: Translation.tr("AI")
-                            }
+                        ContentSubsection {
+                            title: "AI"
+
                             ConfigSelectionArray {
                                 currentValue: Config.options.policies.ai
-                                configOptionName: "policies.ai"
-                                onSelected: (newValue) => {
+                                onSelected: newValue => {
                                     Config.options.policies.ai = newValue;
                                 }
                                 options: [
-                                    { displayName: Translation.tr("No"), value: 0 },
-                                    { displayName: Translation.tr("Yes"), value: 1 },
-                                    { displayName: Translation.tr("Local only"), value: 2 }
+                                    {
+                                        displayName: Translation.tr("No"),
+                                        value: 0
+                                    },
+                                    {
+                                        displayName: Translation.tr("Yes"),
+                                        value: 1
+                                    },
+                                    {
+                                        displayName: Translation.tr("Local only"),
+                                        value: 2
+                                    }
                                 ]
                             }
                         }
@@ -256,6 +352,7 @@ ApplicationWindow {
                 }
 
                 ContentSection {
+                    icon: "info"
                     title: Translation.tr("Info")
 
                     Flow {
@@ -265,7 +362,7 @@ ApplicationWindow {
                         RippleButtonWithIcon {
                             materialIcon: "keyboard_alt"
                             onClicked: {
-                                Quickshell.execDetached(["qs", "-p", Quickshell.shellPath(""), "ipc", "call", "cheatsheet", "toggle"])
+                                Quickshell.execDetached(["qs", "-p", Quickshell.shellPath(""), "ipc", "call", "cheatsheet", "toggle"]);
                             }
                             mainContentComponent: Component {
                                 RowLayout {
@@ -296,20 +393,21 @@ ApplicationWindow {
                             materialIcon: "help"
                             mainText: Translation.tr("Usage")
                             onClicked: {
-                                Qt.openUrlExternally("https://end-4.github.io/dots-hyprland-wiki/en/ii-qs/02usage/")
+                                Qt.openUrlExternally("https://end-4.github.io/dots-hyprland-wiki/en/ii-qs/02usage/");
                             }
                         }
                         RippleButtonWithIcon {
                             materialIcon: "construction"
                             mainText: Translation.tr("Configuration")
                             onClicked: {
-                                Qt.openUrlExternally("https://end-4.github.io/dots-hyprland-wiki/en/ii-qs/03config/")
+                                Qt.openUrlExternally("https://end-4.github.io/dots-hyprland-wiki/en/ii-qs/03config/");
                             }
                         }
                     }
                 }
 
                 ContentSection {
+                    icon: "monitoring"
                     title: Translation.tr("Useless buttons")
 
                     Flow {
@@ -320,14 +418,14 @@ ApplicationWindow {
                             nerdIcon: "󰊤"
                             mainText: Translation.tr("GitHub")
                             onClicked: {
-                                Qt.openUrlExternally("https://github.com/end-4/dots-hyprland")
+                                Qt.openUrlExternally("https://github.com/end-4/dots-hyprland");
                             }
                         }
                         RippleButtonWithIcon {
                             materialIcon: "favorite"
                             mainText: "Funny number"
                             onClicked: {
-                                Qt.openUrlExternally("https://github.com/sponsors/end-4")
+                                Qt.openUrlExternally("https://github.com/sponsors/end-4");
                             }
                         }
                     }

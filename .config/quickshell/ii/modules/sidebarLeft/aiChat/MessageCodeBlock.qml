@@ -185,7 +185,7 @@ ColumnLayout {
                     // contentHeight: codeTextArea.contentHeight
                     clip: true
                     ScrollBar.vertical.policy: ScrollBar.AlwaysOff
-
+                    
                     ScrollBar.horizontal: ScrollBar {
                         anchors.bottom: parent.bottom
                         anchors.left: parent.left

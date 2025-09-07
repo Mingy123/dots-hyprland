@@ -18,10 +18,10 @@ Scope { // Scope
             "icon": "keyboard",
             "name": Translation.tr("Keybinds")
         },
-        {
-            "icon": "experiment",
-            "name": Translation.tr("Elements")
-        },
+        //{
+        //    "icon": "experiment",
+        //    "name": Translation.tr("Elements")
+        //},
     ]
     property int selectedTab: 0
 
@@ -175,16 +175,16 @@ Scope { // Scope
 
                         clip: true
                         layer.enabled: true
-                        layer.effect: OpacityMask {
-                            maskSource: Rectangle {
-                                width: swipeView.width
-                                height: swipeView.height
-                                radius: Appearance.rounding.small
-                            }
-                        }
+                        //layer.effect: OpacityMask {
+                        //    maskSource: Rectangle {
+                        //        width: swipeView.width
+                        //        height: swipeView.height
+                        //        radius: Appearance.rounding.small
+                        //    }
+                        //}
 
                         CheatsheetKeybinds {}
-                        CheatsheetPeriodicTable {}
+                        //CheatsheetPeriodicTable {}
                     }
                 }
             }

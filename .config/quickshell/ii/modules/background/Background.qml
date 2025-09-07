@@ -152,14 +152,22 @@ Scope {
                 visible: !bgRoot.wallpaperIsVideo
                 property real value // 0 to 1, for offset
                 value: {
-                    // Range = groups that workspaces span on
                     const chunkSize = Config?.options.bar.workspaces.shown ?? 10;
-                    const lower = Math.floor(bgRoot.firstWorkspaceId / chunkSize) * chunkSize;
-                    const upper = Math.ceil(bgRoot.lastWorkspaceId / chunkSize) * chunkSize;
-                    const range = upper - lower;
-                    return (Config.options.background.parallax.enableWorkspace ? ((bgRoot.monitor.activeWorkspace.id - lower) / range) : 0.5)
+                    const activeId = bgRoot.monitor.activeWorkspace.id || 1;
+
+                    // compute 0-based chunk index so lower is 0,10,20,... matching original range semantics
+                    const chunkIndex = Math.floor((activeId - 1) / chunkSize);
+                    const lower = chunkIndex * chunkSize;            // 0, 10, 20, ...
+                    const upper = (chunkIndex + 1) * chunkSize;      // 10, 20, 30, ...
+                    const range = (upper - lower) || chunkSize;
+
+                    const workspaceComponent = Config.options.background.parallax.enableWorkspace
+                        ? ((activeId - lower) / range)
+                        : 0.5;
+
+                    return workspaceComponent
                         + (0.15 * GlobalStates.sidebarRightOpen * Config.options.background.parallax.enableSidebar)
-                        - (0.15 * GlobalStates.sidebarLeftOpen * Config.options.background.parallax.enableSidebar)
+                        - (0.15 * GlobalStates.sidebarLeftOpen * Config.options.background.parallax.enableSidebar);
                 }
                 property real effectiveValue: Math.max(0, Math.min(1, value))
                 x: -(bgRoot.movableXSpace) - (effectiveValue - 0.5) * 2 * bgRoot.movableXSpace
@@ -168,7 +176,7 @@ Scope {
                 fillMode: Image.PreserveAspectCrop
                 Behavior on x {
                     NumberAnimation {
-                        duration: 600
+                        duration: 250
                         easing.type: Easing.OutCubic
                     }
                 }
@@ -181,6 +189,7 @@ Scope {
             // The clock
             Item {
                 id: clock
+                visible: false
                 anchors {
                     left: wallpaper.left
                     top: wallpaper.top

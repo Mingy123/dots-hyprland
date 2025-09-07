@@ -336,7 +336,7 @@ ContentPage {
     }
 
     ContentSection {
-        title: Translation.tr("On-screen display")
+        title: Translation.tr("On-screen display (e.g. volume)")
         ConfigSpinBox {
             text: Translation.tr("Timeout (ms)")
             value: Config.options.osd.timeout

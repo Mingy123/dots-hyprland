@@ -20,21 +20,21 @@ Item {
         anchors.rightMargin: 4
 
         Resource {
-            iconName: "memory"
+            iconName: "memory_alt"
             percentage: ResourceUsage.memoryUsedPercentage
         }
 
-        Resource {
-            iconName: "swap_horiz"
-            percentage: ResourceUsage.swapUsedPercentage
-            shown: (Config.options.bar.resources.alwaysShowSwap && percentage > 0) || 
-                (MprisController.activePlayer?.trackTitle == null) ||
-                root.alwaysShowAllResources
-            Layout.leftMargin: shown ? 4 : 0
-        }
+        //Resource {
+        //    iconName: "swap_horiz"
+        //    percentage: ResourceUsage.swapUsedPercentage
+        //    shown: (Config.options.bar.resources.alwaysShowSwap && percentage > 0) || 
+        //        (MprisController.activePlayer?.trackTitle == null) ||
+        //        root.alwaysShowAllResources
+        //    Layout.leftMargin: shown ? 4 : 0
+        //}
 
         Resource {
-            iconName: "settings_slow_motion"
+            iconName: "memory" // looks like a cpu lol
             percentage: ResourceUsage.cpuUsage
             shown: Config.options.bar.resources.alwaysShowCpu || 
                 !(MprisController.activePlayer?.trackTitle?.length > 0) ||

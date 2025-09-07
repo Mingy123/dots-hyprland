@@ -10,22 +10,22 @@ import Quickshell.Io
  * Simple polled resource usage service with RAM, Swap, and CPU usage.
  */
 Singleton {
-	property double memoryTotal: 1
-	property double memoryFree: 1
-	property double memoryUsed: memoryTotal - memoryFree
+    property double memoryTotal: 1
+    property double memoryFree: 1
+    property double memoryUsed: memoryTotal - memoryFree
     property double memoryUsedPercentage: memoryUsed / memoryTotal
     property double swapTotal: 1
-	property double swapFree: 1
-	property double swapUsed: swapTotal - swapFree
+    property double swapFree: 1
+    property double swapUsed: swapTotal - swapFree
     property double swapUsedPercentage: swapTotal > 0 ? (swapUsed / swapTotal) : 0
     property double cpuUsage: 0
     property var previousCpuStats
 
-	Timer {
-		interval: 1
+    Timer {
+        interval: 1
         running: true 
         repeat: true
-		onTriggered: {
+        onTriggered: {
             // Reload files
             fileMeminfo.reload()
             fileStat.reload()
@@ -55,8 +55,8 @@ Singleton {
             }
             interval = Config.options?.resources?.updateInterval ?? 3000
         }
-	}
+    }
 
-	FileView { id: fileMeminfo; path: "/proc/meminfo" }
+    FileView { id: fileMeminfo; path: "/proc/meminfo" }
     FileView { id: fileStat; path: "/proc/stat" }
 }

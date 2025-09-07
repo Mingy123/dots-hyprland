@@ -40,6 +40,12 @@ Item {
             Layout.alignment: Qt.AlignVCenter
             color: Appearance.colors.colOnLayer1
             text: `${Math.round(percentage * 100)}`
+            Layout.preferredWidth: widestTextMetrics.width
+            TextMetrics {
+                id: widestTextMetrics
+                font: parent.font
+                text: "100" // maximum width needed
+            }
         }
 
         Behavior on x {

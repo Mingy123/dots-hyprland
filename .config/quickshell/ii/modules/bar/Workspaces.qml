@@ -28,6 +28,11 @@ Item {
     property real workspaceIconMarginShrinked: -4
     property int workspaceIndexInGroup: (monitor.activeWorkspace?.id - 1) % Config.options.bar.workspaces.shown
 
+    property var monitorHighlightColors: ({
+        "HDMI-A-1": "#ff0000",
+        "HDMI-A-2": "#00ff00"
+    })
+
     // Function to update workspaceOccupied
     function updateWorkspaceOccupied() {
         workspaceOccupied = Array.from({ length: Config.options.bar.workspaces.shown }, (_, i) => {
@@ -97,7 +102,10 @@ Item {
                 topRightRadius: radiusRight
                 bottomRightRadius: radiusRight
                 
-                color: ColorUtils.transparentize(Appearance.m3colors.m3secondaryContainer, 0.4)
+                color: ColorUtils.transparentize(
+                    Appearance.m3colors.m3secondaryContainer,
+                    0.4
+                )
                 opacity: (workspaceOccupied[index] && !(!activeWindow?.activated && monitor.activeWorkspace?.id === index+1)) ? 1 : 0
 
                 Behavior on opacity {
@@ -124,6 +132,7 @@ Item {
         property real activeWorkspaceMargin: 2
         implicitHeight: workspaceButtonWidth - activeWorkspaceMargin * 2
         radius: Appearance.rounding.full
+        //color: monitorHighlightColors[monitor.name]
         color: Appearance.colors.colPrimary
         anchors.verticalCenter: parent.verticalCenter
 

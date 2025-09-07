@@ -405,6 +405,18 @@ Item { // Wrapper
                             }
                         });
 
+                        ///////////////// Youtube search ////////////////
+                        result.push({
+                            name: root.searchingText,
+                            clickActionName: Translation.tr("Search"),
+                            type: Translation.tr("Search") + " YouTube",
+                            materialSymbol: 'youtube_activity',
+                            execute: () => {
+                                let url = Config.options.search.yt_engineBaseUrl + root.searchingText;
+                                Qt.openUrlExternally(url);
+                            }
+                        });
+
                         return result;
                     }
                 }

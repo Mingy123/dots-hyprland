@@ -162,46 +162,9 @@ Scope {
                         buttonText: Translation.tr("Lock")
                         onClicked:  { Quickshell.execDetached(["loginctl", "lock-session"]); sessionRoot.hide() }
                         onFocusChanged: { if (focus) sessionRoot.subtitle = buttonText }
-                        KeyNavigation.right: sessionSleep
-                        KeyNavigation.down: sessionHibernate
-                    }
-                    SessionActionButton {
-                        id: sessionSleep
-                        buttonIcon: "dark_mode"
-                        buttonText: Translation.tr("Sleep")
-                        onClicked:  { Quickshell.execDetached(["bash", "-c", "systemctl suspend || loginctl suspend"]); sessionRoot.hide() }
-                        onFocusChanged: { if (focus) sessionRoot.subtitle = buttonText }
-                        KeyNavigation.left: sessionLock
-                        KeyNavigation.right: sessionLogout
-                        KeyNavigation.down: sessionShutdown
-                    }
-                    SessionActionButton {
-                        id: sessionLogout
-                        buttonIcon: "logout"
-                        buttonText: Translation.tr("Logout")
-                        onClicked: { root.closeAllWindows(); Quickshell.execDetached(["pkill", "Hyprland"]); sessionRoot.hide() }
-                        onFocusChanged: { if (focus) sessionRoot.subtitle = buttonText }
-                        KeyNavigation.left: sessionSleep
-                        KeyNavigation.right: sessionTaskManager
-                        KeyNavigation.down: sessionReboot
-                    }
-                    SessionActionButton {
-                        id: sessionTaskManager
-                        buttonIcon: "browse_activity"
-                        buttonText: Translation.tr("Task Manager")
-                        onClicked:  { Quickshell.execDetached(["bash", "-c", `${Config.options.apps.taskManager}`]); sessionRoot.hide() }
-                        onFocusChanged: { if (focus) sessionRoot.subtitle = buttonText }
-                        KeyNavigation.left: sessionLogout
-                        KeyNavigation.down: sessionFirmwareReboot
-                    }
-
-                    SessionActionButton {
-                        id: sessionHibernate
-                        buttonIcon: "downloading"
-                        buttonText: Translation.tr("Hibernate")
-                        onClicked:  { Quickshell.execDetached(["bash", "-c", `systemctl hibernate || loginctl hibernate`]); sessionRoot.hide() }
-                        onFocusChanged: { if (focus) sessionRoot.subtitle = buttonText }
-                        KeyNavigation.up: sessionLock
+                        KeyNavigation.left: sessionHibernate
+                        KeyNavigation.down: sessionSleep
+                        KeyNavigation.up: sessionSleep
                         KeyNavigation.right: sessionShutdown
                     }
                     SessionActionButton {
@@ -210,9 +173,43 @@ Scope {
                         buttonText: Translation.tr("Shutdown")
                         onClicked:  { root.closeAllWindows(); Quickshell.execDetached(["bash", "-c", `systemctl poweroff || loginctl poweroff`]); sessionRoot.hide() }
                         onFocusChanged: { if (focus) sessionRoot.subtitle = buttonText }
-                        KeyNavigation.left: sessionHibernate
+                        KeyNavigation.left: sessionLock
+                        KeyNavigation.right: sessionTaskManager
+                        KeyNavigation.up: sessionReboot
+                        KeyNavigation.down: sessionReboot
+                    }
+                    SessionActionButton {
+                        id: sessionTaskManager
+                        buttonIcon: "browse_activity"
+                        buttonText: Translation.tr("Task Manager")
+                        onClicked:  { Quickshell.execDetached(["bash", "-c", `${Config.options.apps.taskManager}`]); sessionRoot.hide() }
+                        onFocusChanged: { if (focus) sessionRoot.subtitle = buttonText }
+                        KeyNavigation.left: sessionShutdown
+                        KeyNavigation.right: sessionHibernate
+                        KeyNavigation.up: sessionFirmwareReboot
+                        KeyNavigation.down: sessionFirmwareReboot
+                    }
+                    SessionActionButton {
+                        id: sessionHibernate
+                        buttonIcon: "downloading"
+                        buttonText: Translation.tr("Hibernate")
+                        onClicked:  { Quickshell.execDetached(["bash", "-c", `systemctl hibernate || loginctl hibernate`]); sessionRoot.hide() }
+                        onFocusChanged: { if (focus) sessionRoot.subtitle = buttonText }
+                        KeyNavigation.left: sessionTaskManager
+                        KeyNavigation.right: sessionLock
+                        KeyNavigation.up: sessionLogout
+                        KeyNavigation.down: sessionLogout
+                    }
+                    SessionActionButton {
+                        id: sessionSleep
+                        buttonIcon: "dark_mode"
+                        buttonText: Translation.tr("Sleep")
+                        onClicked:  { Quickshell.execDetached(["bash", "-c", "systemctl suspend || loginctl suspend"]); sessionRoot.hide() }
+                        onFocusChanged: { if (focus) sessionRoot.subtitle = buttonText }
+                        KeyNavigation.left: sessionLogout
                         KeyNavigation.right: sessionReboot
-                        KeyNavigation.up: sessionSleep
+                        KeyNavigation.up: sessionLock
+                        KeyNavigation.down: sessionLock
                     }
                     SessionActionButton {
                         id: sessionReboot
@@ -220,9 +217,10 @@ Scope {
                         buttonText: Translation.tr("Reboot")
                         onClicked:  { root.closeAllWindows(); Quickshell.execDetached(["bash", "-c", `reboot || loginctl reboot`]); sessionRoot.hide() }
                         onFocusChanged: { if (focus) sessionRoot.subtitle = buttonText }
-                        KeyNavigation.left: sessionShutdown
+                        KeyNavigation.left: sessionSleep
                         KeyNavigation.right: sessionFirmwareReboot
-                        KeyNavigation.up: sessionLogout
+                        KeyNavigation.up: sessionShutdown
+                        KeyNavigation.down: sessionShutdown
                     }
                     SessionActionButton {
                         id: sessionFirmwareReboot
@@ -230,8 +228,21 @@ Scope {
                         buttonText: Translation.tr("Reboot to firmware settings")
                         onClicked:  { root.closeAllWindows(); Quickshell.execDetached(["bash", "-c", `systemctl reboot --firmware-setup || loginctl reboot --firmware-setup`]); sessionRoot.hide() }
                         onFocusChanged: { if (focus) sessionRoot.subtitle = buttonText }
-                        KeyNavigation.up: sessionTaskManager
                         KeyNavigation.left: sessionReboot
+                        KeyNavigation.right: sessionLogout
+                        KeyNavigation.up: sessionTaskManager
+                        KeyNavigation.down: sessionTaskManager
+                    }
+                    SessionActionButton {
+                        id: sessionLogout
+                        buttonIcon: "logout"
+                        buttonText: Translation.tr("Logout")
+                        onClicked: { root.closeAllWindows(); Quickshell.execDetached(["pkill", "Hyprland"]); sessionRoot.hide() }
+                        onFocusChanged: { if (focus) sessionRoot.subtitle = buttonText }
+                        KeyNavigation.left: sessionFirmwareReboot
+                        KeyNavigation.right: sessionSleep
+                        KeyNavigation.up: sessionHibernate
+                        KeyNavigation.down: sessionHibernate
                     }
                 }
 

@@ -446,21 +446,6 @@ Item { // Wrapper
                             if (!startsWithWebSearchPrefix) result.push(webSearchResultObject);
                         }
 
-                        ///////////////// Web search ////////////////
-                        result.push({
-                            name: root.searchingText,
-                            clickActionName: Translation.tr("Search"),
-                            type: Translation.tr("Search the web"),
-                            materialSymbol: 'travel_explore',
-                            execute: () => {
-                                let url = Config.options.search.engineBaseUrl + root.searchingText;
-                                for (let site of Config.options.search.excludedSites) {
-                                    url += ` -site:${site}`;
-                                }
-                                Qt.openUrlExternally(url);
-                            }
-                        });
-
                         ///////////////// Youtube search ////////////////
                         result.push({
                             name: root.searchingText,

@@ -171,69 +171,6 @@ Variants {
         }
 
         // Wallpaper
-        // Image {
-        //     id: wallpaper
-        //     visible: opacity > 0
-        //     opacity: (status === Image.Ready && !bgRoot.wallpaperIsVideo) ? 1 : 0
-        //     Behavior on opacity {
-        //         animation: Appearance.animation.elementMoveEnter.numberAnimation.createObject(this)
-        //     }
-        //     cache: false
-        //     asynchronous: true
-        //     retainWhileLoading: true
-
-        //     // Range = groups that workspaces span on
-
-        //     property int chunkSize: Config?.options.bar.workspaces.shown ?? 10;
-        //     property int activeId: bgRoot.monitor.activeWorkspace.id || 1;
-        //     property int chunkIndex: Math.floor((activeId - 1) / chunkSize);
-        //     property int lower: chunkIndex * chunkSize;
-        //     property int upper: (chunkIndex + 1) * chunkSize;
-        //     property int range: (upper - lower) || chunkSize;
-        //     property real valueX: {
-        //         let result = 0.5;
-        //         if (Config.options.background.parallax.enableWorkspace && !bgRoot.verticalParallax) {
-        //             result = ((bgRoot.monitor.activeWorkspace?.id - lower) / range);
-        //         }
-        //         if (Config.options.background.parallax.enableSidebar) {
-        //             result += (0.15 * GlobalStates.sidebarRightOpen - 0.15 * GlobalStates.sidebarLeftOpen);
-        //         }
-        //         return result;
-        //     }
-        //     property real valueY: {
-        //         let result = 0.5;
-        //         if (Config.options.background.parallax.enableWorkspace && bgRoot.verticalParallax) {
-        //             result = ((bgRoot.monitor.activeWorkspace?.id - lower) / range);
-        //         }
-        //         return result;
-        //     }
-        //     property real effectiveValueX: Math.max(0, Math.min(1, valueX))
-        //     property real effectiveValueY: Math.max(0, Math.min(1, valueY))
-        //     x: -(bgRoot.movableXSpace) - (effectiveValueX - 0.5) * 2 * bgRoot.movableXSpace
-        //     y: -(bgRoot.movableYSpace) - (effectiveValueY - 0.5) * 2 * bgRoot.movableYSpace
-        //     source: bgRoot.wallpaperPath
-        //     fillMode: Image.PreserveAspectCrop
-        //     Behavior on x {
-        //         NumberAnimation {
-        //             duration: 250
-        //             easing.type: Easing.OutCubic
-        //             //easing.type: Easing.BezierSpline
-        //             //easing.bezierCurve: Qt.vector4d(0.05, 0.7, 0.1, 1)
-        //         }
-        //     }
-        //     Behavior on y {
-        //         NumberAnimation {
-        //             duration: 250
-        //             easing.type: Easing.OutCubic
-        //         }
-        //     }
-        //     sourceSize {
-        //         width: bgRoot.screen.width * bgRoot.effectiveWallpaperScale * bgRoot.monitor.scale
-        //         height: bgRoot.screen.height * bgRoot.effectiveWallpaperScale * bgRoot.monitor.scale
-        //     }
-        //     width: bgRoot.wallpaperWidth / bgRoot.wallpaperToScreenRatio * bgRoot.effectiveWallpaperScale
-        //     height: bgRoot.wallpaperHeight / bgRoot.wallpaperToScreenRatio * bgRoot.effectiveWallpaperScale
-        // }
         Item {
             anchors.fill: parent
             clip: true
@@ -244,10 +181,12 @@ Variants {
                 cache: false
                 smooth: false
                 // Range = groups that workspaces span on
-                property int chunkSize: Config?.options.bar.workspaces.shown ?? 10
-                property int lower: Math.floor(bgRoot.firstWorkspaceId / chunkSize) * chunkSize
-                property int upper: Math.ceil(bgRoot.lastWorkspaceId / chunkSize) * chunkSize
-                property int range: upper - lower
+                property int chunkSize: Config?.options.bar.workspaces.shown ?? 10;
+                property int activeId: bgRoot.monitor.activeWorkspace.id || 1;
+                property int chunkIndex: Math.floor((activeId - 1) / chunkSize);
+                property int lower: chunkIndex * chunkSize;
+                property int upper: (chunkIndex + 1) * chunkSize;
+                property int range: (upper - lower) || chunkSize;
                 property real valueX: {
                     let result = 0.5;
                     if (Config.options.background.parallax.enableWorkspace && !bgRoot.verticalParallax) {
@@ -273,13 +212,13 @@ Variants {
                 fillMode: Image.PreserveAspectCrop
                 Behavior on x {
                     NumberAnimation {
-                        duration: 600
+                        duration: 250
                         easing.type: Easing.OutCubic
                     }
                 }
                 Behavior on y {
                     NumberAnimation {
-                        duration: 600
+                        duration: 250
                         easing.type: Easing.OutCubic
                     }
                 }

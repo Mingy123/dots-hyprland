@@ -119,7 +119,7 @@ Singleton {
         }
 
         function setBrightness(value: real): void {
-            value = Math.max(0.01, Math.min(1, value));
+            value = Math.max(0, Math.min(1, value));
             monitor.brightness = value;
             setTimer.restart();
         }

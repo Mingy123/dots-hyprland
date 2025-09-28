@@ -16,6 +16,7 @@ RowLayout {
     Layout.rightMargin: 8
 
     RowLayout {
+        spacing: 10
         OptionalMaterialSymbol {
             icon: root.icon
         }
@@ -23,7 +24,6 @@ RowLayout {
             id: labelWidget
             Layout.fillWidth: true
             text: root.text
-            font.pixelSize: Appearance.font.pixelSize.small
             color: Appearance.colors.colOnSecondaryContainer
         }
     }

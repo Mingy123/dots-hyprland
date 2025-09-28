@@ -76,6 +76,7 @@ Singleton {
         required property ShellScreen screen
         readonly property bool isDdc: root.ddcMonitors.some(m => m.model === screen.model)
         readonly property string busNum: root.ddcMonitors.find(m => m.model === screen.model)?.busNum ?? ""
+        property int rawMaxBrightness: 100
         property real brightness
         property bool ready: false
 
@@ -95,20 +96,32 @@ Singleton {
             stdout: SplitParser {
                 onRead: data => {
                     const [, , , current, max] = data.split(" ");
-                    monitor.brightness = parseInt(current) / parseInt(max);
+                    monitor.rawMaxBrightness = parseInt(max);
+                    monitor.brightness = parseInt(current) / monitor.rawMaxBrightness;
                     monitor.ready = true;
                 }
             }
         }
 
-        function setBrightness(value: real): void {
-            value = Math.max(0, Math.min(1, value));
-            const rounded = Math.round(value * 100);
-            if (Math.round(brightness * 100) === rounded)
-                return;
-            brightness = value;
-            setProc.command = isDdc ? ["ddcutil", "-b", busNum, "setvcp", "10", rounded] : ["brightnessctl", "s", `${rounded}%`, "--quiet"];
+        // We need a delay for DDC monitors because they can be quite slow and might act weird with rapid changes
+        property var setTimer: Timer {
+            id: setTimer
+            interval: monitor.isDdc ? 300 : 0
+            onTriggered: {
+                syncBrightness();
+            }
+        }
+
+        function syncBrightness() {
+            const rounded = Math.round(monitor.brightness * monitor.rawMaxBrightness);
+            setProc.command = isDdc ? ["ddcutil", "-b", busNum, "setvcp", "10", rounded] : ["brightnessctl", "s", rounded, "--quiet"];
             setProc.startDetached();
+        }
+
+        function setBrightness(value: real): void {
+            value = Math.max(0.01, Math.min(1, value));
+            monitor.brightness = value;
+            setTimer.restart();
         }
 
         Component.onCompleted: {

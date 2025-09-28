@@ -7,66 +7,6 @@ import qs.modules.common.widgets
 
 ContentPage {
     forceWidth: true
-    ContentSection {
-        icon: "rule"
-        title: Translation.tr("Policies")
-
-        ConfigRow {
-            ColumnLayout {
-                // Weeb policy
-                ContentSubsectionLabel {
-                    text: Translation.tr("Weeb")
-                }
-                ConfigSelectionArray {
-                    currentValue: Config.options.policies.weeb
-                    onSelected: newValue => {
-                        Config.options.policies.weeb = newValue;
-                    }
-                    options: [
-                        {
-                            displayName: Translation.tr("No"),
-                            value: 0
-                        },
-                        {
-                            displayName: Translation.tr("Yes"),
-                            value: 1
-                        },
-                        {
-                            displayName: Translation.tr("Closet"),
-                            value: 2
-                        }
-                    ]
-                }
-            }
-
-            ColumnLayout {
-                // AI policy
-                ContentSubsectionLabel {
-                    text: Translation.tr("AI")
-                }
-                ConfigSelectionArray {
-                    currentValue: Config.options.policies.ai
-                    onSelected: newValue => {
-                        Config.options.policies.ai = newValue;
-                    }
-                    options: [
-                        {
-                            displayName: Translation.tr("No"),
-                            value: 0
-                        },
-                        {
-                            displayName: Translation.tr("Yes"),
-                            value: 1
-                        },
-                        {
-                            displayName: Translation.tr("Local only"),
-                            value: 2
-                        }
-                    ]
-                }
-            }
-        }
-    }
 
     ContentSection {
         icon: "wallpaper"
@@ -74,9 +14,42 @@ ContentPage {
 
         ConfigSwitch {
             text: Translation.tr("Show clock")
-            checked: Config.options.background.showClock
+            checked: Config.options.background.clock.show
             onCheckedChanged: {
-                Config.options.background.showClock = checked;
+                Config.options.background.clock.show = checked;
+            }
+        }
+
+        ConfigSpinBox {
+            text: Translation.tr("Scale (%)")
+            value: Config.options.background.clock.scale * 100
+            from: 1
+            to: 200
+            stepSize: 2
+            onValueChanged: {
+                Config.options.background.clock.scale = value / 100;
+            }
+        }
+
+        ContentSubsection {
+            title: Translation.tr("Clock style")
+            ConfigSelectionArray {
+                currentValue: Config.options.background.clock.style
+                onSelected: newValue => {
+                    Config.options.background.clock.style = newValue;
+                }
+                options: [
+                    {
+                        displayName: Translation.tr("Simple digital"),
+                        icon: "timer_10",
+                        value: "digital"
+                    },
+                    {
+                        displayName: Translation.tr("Material cookie"),
+                        icon: "cookie",
+                        value: "cookie"
+                    },
+                ]
             }
         }
 
@@ -122,52 +95,31 @@ ContentPage {
     }
 
     ContentSection {
-        icon: "battery_android_full"
-        title: Translation.tr("Battery")
+        icon: "point_scan"
+        title: Translation.tr("Crosshair")
 
-        ConfigRow {
-            uniform: true
-            ConfigSpinBox {
-                text: Translation.tr("Low warning")
-                value: Config.options.battery.low
-                from: 0
-                to: 100
-                stepSize: 5
-                onValueChanged: {
-                    Config.options.battery.low = value;
-                }
-            }
-            ConfigSpinBox {
-                text: Translation.tr("Critical warning")
-                value: Config.options.battery.critical
-                from: 0
-                to: 100
-                stepSize: 5
-                onValueChanged: {
-                    Config.options.battery.critical = value;
-                }
+        MaterialTextArea {
+            Layout.fillWidth: true
+            placeholderText: Translation.tr("Crosshair code (in Valorant's format)")
+            text: Config.options.crosshair.code
+            wrapMode: TextEdit.Wrap
+            onTextChanged: {
+                Config.options.crosshair.code = text;
             }
         }
-        ConfigRow {
-            uniform: true
-            ConfigSwitch {
-                text: Translation.tr("Automatic suspend")
-                checked: Config.options.battery.automaticSuspend
-                onCheckedChanged: {
-                    Config.options.battery.automaticSuspend = checked;
+
+        RowLayout {
+            Item { Layout.fillWidth: true }
+            RippleButtonWithIcon {
+                id: editorButton
+                buttonRadius: Appearance.rounding.full
+                materialIcon: "open_in_new"
+                mainText: Translation.tr("Open editor")
+                onClicked: {
+                    Qt.openUrlExternally(`https://www.vcrdb.net/builder?c=${Config.options.crosshair.code}`);
                 }
                 StyledToolTip {
-                    content: Translation.tr("Automatically suspends the system when battery is low")
-                }
-            }
-            ConfigSpinBox {
-                text: Translation.tr("Suspend at")
-                value: Config.options.battery.suspend
-                from: 0
-                to: 100
-                stepSize: 5
-                onValueChanged: {
-                    Config.options.battery.suspend = value;
+                    text: "www.vcrdb.net"
                 }
             }
         }
@@ -212,6 +164,68 @@ ContentPage {
     }
 
     ContentSection {
+        icon: "lock"
+        title: Translation.tr("Lock screen")
+
+        ContentSubsection {
+            title: Translation.tr("Blurred style")
+
+            ConfigSwitch {
+                text: Translation.tr('Enable blur')
+                checked: Config.options.lock.blur.enable
+                onCheckedChanged: {
+                    Config.options.lock.blur.enable = checked;
+                }
+            }
+
+            ConfigSpinBox {
+                text: Translation.tr("Blur: Extra zoom (%)")
+                value: Config.options.lock.blur.extraZoom * 100
+                from: 1
+                to: 150
+                stepSize: 2
+                onValueChanged: {
+                    Config.options.lock.blur.extraZoom = value / 100;
+                }
+            }
+
+            ConfigSwitch {
+                text: Translation.tr('Center clock')
+                checked: Config.options.lock.centerClock
+                onCheckedChanged: {
+                    Config.options.lock.centerClock = checked;
+                }
+            }
+            
+            ConfigSwitch {
+                text: Translation.tr('Show "Locked" text')
+                checked: Config.options.lock.showLockedText
+                onCheckedChanged: {
+                    Config.options.lock.showLockedText = checked;
+                }
+            }
+            
+
+        }
+    }
+
+    ContentSection {
+        icon: "notifications"
+        title: Translation.tr("Notifications")
+
+        ConfigSpinBox {
+            text: Translation.tr("Timeout duration (if not defined by notification) (ms)")
+            value: Config.options.notifications.timeout
+            from: 1000
+            to: 60000
+            stepSize: 1000
+            onValueChanged: {
+                Config.options.notifications.timeout = value;
+            }
+        }
+    }
+
+    ContentSection {
         icon: "side_navigation"
         title: Translation.tr("Sidebars")
 
@@ -222,7 +236,7 @@ ContentPage {
                 Config.options.sidebar.keepRightSidebarLoaded = checked;
             }
             StyledToolTip {
-                content: Translation.tr("When enabled keeps the content of the right sidebar loaded to reduce the delay when opening,\nat the cost of around 15MB of consistent RAM usage. Delay significance depends on your system's performance.\nUsing a custom kernel like linux-cachyos might help")
+                text: Translation.tr("When enabled keeps the content of the right sidebar loaded to reduce the delay when opening,\nat the cost of around 15MB of consistent RAM usage. Delay significance depends on your system's performance.\nUsing a custom kernel like linux-cachyos might help")
             }
         }
 
@@ -246,7 +260,7 @@ ContentPage {
                     }
 
                     StyledToolTip {
-                        content: Translation.tr("When this is off you'll have to click")
+                        text: Translation.tr("When this is off you'll have to click")
                     }
                 }
             }
@@ -260,7 +274,7 @@ ContentPage {
                     }
 
                     StyledToolTip {
-                        content: Translation.tr("Place the corners to trigger at the bottom")
+                        text: Translation.tr("Place the corners to trigger at the bottom")
                     }
                 }
                 ConfigSwitch {
@@ -271,7 +285,7 @@ ContentPage {
                     }
 
                     StyledToolTip {
-                        content: Translation.tr("Brightness and volume")
+                        text: Translation.tr("Brightness and volume")
                     }
                 }
             }
@@ -280,10 +294,6 @@ ContentPage {
                 checked: Config.options.sidebar.cornerOpen.visualize
                 onCheckedChanged: {
                     Config.options.sidebar.cornerOpen.visualize = checked;
-                }
-
-                StyledToolTip {
-                    content: "When this is off you'll have to click"
                 }
             }
             ConfigRow {
@@ -384,38 +394,9 @@ ContentPage {
                 Config.options.screenshotTool.showContentRegions = checked;
             }
             StyledToolTip {
-                content: Translation.tr("Such regions could be images or parts of the screen that have some containment.\nMight not always be accurate.\nThis is done with an image processing algorithm run locally and no AI is used.")
+                text: Translation.tr("Such regions could be images or parts of the screen that have some containment.\nMight not always be accurate.\nThis is done with an image processing algorithm run locally and no AI is used.")
             }
         }
     }
 
-    ContentSection {
-        icon: "language"
-        title: Translation.tr("Language")
-
-        ContentSubsection {
-            title: Translation.tr("Interface Language")
-            tooltip: Translation.tr("Select the language for the user interface.\n\"Auto\" will use your system's locale.")
-
-            ConfigSelectionArray {
-                id: languageSelector
-                currentValue: Config.options.language.ui
-                onSelected: newValue => {
-                    Config.options.language.ui = newValue;
-                }
-                options: [
-                    {
-                        displayName: Translation.tr("Auto (System)"),
-                        value: "auto"
-                    },
-                    ...Translation.availableLanguages.map(lang => {
-                        return {
-                            displayName: lang.replace('_', '-'),
-                            value: lang
-                        };
-                    })
-                ]
-            }
-        }
-    }
 }

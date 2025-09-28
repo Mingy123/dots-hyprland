@@ -10,7 +10,7 @@ import Qt5Compat.GraphicalEffects
 import Quickshell
 import Quickshell.Io
 
-Item {
+MouseArea {
     id: root
     property int columns: 4
     property real previewCellAspectRatio: 4 / 3
@@ -40,6 +40,22 @@ Item {
         }
     }
 
+    function selectWallpaperPath(filePath) {
+        if (filePath && filePath.length > 0) {
+            Wallpapers.select(filePath, root.useDarkMode);
+            filterField.text = "";
+        }
+    }
+
+    acceptedButtons: Qt.BackButton | Qt.ForwardButton
+    onPressed: event => {
+        if (event.button === Qt.BackButton) {
+            Wallpapers.navigateBack();
+        } else if (event.button === Qt.ForwardButton) {
+            Wallpapers.navigateForward();
+        }
+    }
+
     Keys.onPressed: event => {
         if (event.key === Qt.Key_Escape) {
             GlobalStates.wallpaperSelectorOpen = false;
@@ -47,7 +63,13 @@ Item {
         } else if ((event.modifiers & Qt.ControlModifier) && event.key === Qt.Key_V) { // Intercept Ctrl+V to handle "paste to go to" in pickers
             root.handleFilePasting(event);
         } else if (event.modifiers & Qt.AltModifier && event.key === Qt.Key_Up) {
-            Wallpapers.setDirectory(FileUtils.parentDirectory(Wallpapers.directory));
+            Wallpapers.navigateUp();
+            event.accepted = true;
+        } else if (event.modifiers & Qt.AltModifier && event.key === Qt.Key_Left) {
+            Wallpapers.navigateBack();
+            event.accepted = true;
+        } else if (event.modifiers & Qt.AltModifier && event.key === Qt.Key_Right) {
+            Wallpapers.navigateForward();
             event.accepted = true;
         } else if (event.key === Qt.Key_Left) {
             grid.moveSelection(-1);
@@ -149,7 +171,7 @@ Item {
                             { icon: "movie", name: "Videos", path: Directories.videos }, 
                             { icon: "", name: "---", path: "INTENTIONALLY_INVALID_DIR" }, 
                             { icon: "wallpaper", name: "Wallpapers", path: `${Directories.pictures}/Wallpapers` }, 
-                            { icon: "favorite", name: "Homework", path: `${Directories.pictures}/homework` },
+                            ...(Config.options.policies.weeb === 1 ? [{ icon: "favorite", name: "Homework", path: `${Directories.pictures}/homework` }] : []),
                         ]
                         delegate: RippleButton {
                             id: quickDirButton
@@ -160,7 +182,7 @@ Item {
                             }
                             onClicked: Wallpapers.setDirectory(quickDirButton.modelData.path)
                             enabled: modelData.icon.length > 0
-                            toggled: Wallpapers.directory === FileUtils.trimFileProtocol(modelData.path)
+                            toggled: Wallpapers.directory === Qt.resolvedUrl(modelData.path)
                             colBackgroundToggled: Appearance.colors.colSecondaryContainer
                             colBackgroundToggledHover: Appearance.colors.colSecondaryContainerHover
                             colRippleToggled: Appearance.colors.colSecondaryContainerActive
@@ -170,6 +192,7 @@ Item {
                                     color: quickDirButton.toggled ? Appearance.colors.colOnSecondaryContainer : Appearance.colors.colOnLayer1
                                     iconSize: Appearance.font.pixelSize.larger
                                     text: quickDirButton.modelData.icon
+                                    fill: quickDirButton.toggled ? 1 : 0
                                 }
                                 StyledText {
                                     Layout.fillWidth: true
@@ -193,7 +216,7 @@ Item {
                     Layout.margins: 4
                     Layout.fillWidth: true
                     Layout.fillHeight: false
-                    directory: Wallpapers.directory
+                    directory: Wallpapers.effectiveDirectory
                     onNavigateToDirectory: path => {
                         Wallpapers.setDirectory(path.length == 0 ? "/" : path);
                     }
@@ -252,8 +275,7 @@ Item {
 
                         function activateCurrent() {
                             const filePath = grid.model.get(currentIndex, "filePath")
-                            Wallpapers.select(filePath, root.useDarkMode);
-                            filterField.text = "";
+                            root.selectWallpaperPath(filePath);
                         }
 
                         model: Wallpapers.folderModel
@@ -272,8 +294,7 @@ Item {
                             }
                             
                             onActivated: {
-                                Wallpapers.select(fileModelData.filePath, root.useDarkMode);
-                                filterField.text = "";
+                                root.selectWallpaperPath(fileModelData.filePath);
                             }
                         }
 
@@ -301,12 +322,35 @@ Item {
                                 Wallpapers.openFallbackPicker(root.useDarkMode);
                                 GlobalStates.wallpaperSelectorOpen = false;
                             }
+                            altAction: () => {
+                                Wallpapers.openFallbackPicker(root.useDarkMode);
+                                GlobalStates.wallpaperSelectorOpen = false;
+                                Config.options.wallpaperSelector.useSystemFileDialog = true
+                            }
                             contentItem: MaterialSymbol {
+                                anchors.centerIn: parent
+                                horizontalAlignment: Text.AlignHCenter
                                 text: "open_in_new"
                                 iconSize: Appearance.font.pixelSize.larger
                             }
                             StyledToolTip {
-                                content: Translation.tr("Use the system file picker instead")
+                                text: Translation.tr("Use the system file picker instead\nRight-click to make this the default behavior")
+                            }
+                        }
+
+                        ToolbarButton {
+                            implicitWidth: height
+                            onClicked: {
+                                Wallpapers.randomFromCurrentFolder();
+                            }
+                            contentItem: MaterialSymbol {
+                                anchors.centerIn: parent
+                                horizontalAlignment: Text.AlignHCenter
+                                text: "ifl"
+                                iconSize: Appearance.font.pixelSize.larger
+                            }
+                            StyledToolTip {
+                                text: Translation.tr("Pick random from this folder")
                             }
                         }
 
@@ -314,11 +358,13 @@ Item {
                             implicitWidth: height
                             onClicked: root.useDarkMode = !root.useDarkMode
                             contentItem: MaterialSymbol {
+                                anchors.centerIn: parent
+                                horizontalAlignment: Text.AlignHCenter
                                 text: root.useDarkMode ? "dark_mode" : "light_mode"
                                 iconSize: Appearance.font.pixelSize.larger
                             }
                             StyledToolTip {
-                                content: Translation.tr("Click to toggle light/dark mode (applied when wallpaper is chosen)")
+                                text: Translation.tr("Click to toggle light/dark mode\n(applied when wallpaper is chosen)")
                             }
                         }
 
@@ -358,11 +404,18 @@ Item {
                         }
 
                         ToolbarButton {
+                            implicitWidth: height
                             onClicked: {
                                 GlobalStates.wallpaperSelectorOpen = false;
                             }
-                            contentItem: StyledText {
-                                text: "Cancel"
+                            contentItem: MaterialSymbol {
+                                anchors.centerIn: parent
+                                horizontalAlignment: Text.AlignHCenter
+                                text: "cancel_presentation"
+                                iconSize: Appearance.font.pixelSize.larger
+                            }
+                            StyledToolTip {
+                                text: Translation.tr("Cancel wallpaper selection")
                             }
                         }
                     }

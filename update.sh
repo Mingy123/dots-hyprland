@@ -600,7 +600,7 @@ if ! git diff --quiet || ! git diff --cached --quiet; then
   git status --short
   echo
 
-  if ! safe_read "Do you want to continue? This will stash your changes. (y/N): " response "N"; then
+  if ! safe_read "Do you want to continue? (y/N): " response "N"; then
     echo
     log_error "Failed to read input. Aborting."
     exit 1
@@ -609,8 +609,8 @@ if ! git diff --quiet || ! git diff --cached --quiet; then
   if [[ ! "$response" =~ ^[Yy]$ ]]; then
     die "Aborted by user"
   fi
-  git stash push -m "Auto-stash before update $(date)"
-  log_info "Changes stashed"
+  #git stash push -m "Auto-stash before update $(date)"
+  log_info "Proceeding"
 fi
 
 # Check if remote exists

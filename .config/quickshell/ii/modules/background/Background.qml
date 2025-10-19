@@ -188,6 +188,7 @@ Variants {
                 property int upper: (chunkIndex + 1) * chunkSize;
                 property int range: (upper - lower) || chunkSize;
                 property real valueX: {
+                    if (GlobalStates.screenLocked) return 0.5;
                     let result = 0.5;
                     if (Config.options.background.parallax.enableWorkspace && !bgRoot.verticalParallax) {
                         result = ((bgRoot.monitor.activeWorkspace?.id - lower) / range);
@@ -198,6 +199,7 @@ Variants {
                     return result;
                 }
                 property real valueY: {
+                    if (GlobalStates.screenLocked) return 0.5;
                     let result = 0.5;
                     if (Config.options.background.parallax.enableWorkspace && bgRoot.verticalParallax) {
                         result = ((bgRoot.monitor.activeWorkspace?.id - lower) / range);

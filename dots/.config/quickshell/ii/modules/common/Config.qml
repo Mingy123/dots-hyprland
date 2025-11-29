@@ -178,6 +178,7 @@ Singleton {
                         property JsonObject quote: JsonObject {
                             property bool enable: false
                             property string text: ""
+                            property list<string> textList: [ ]
                         }
                     }
                     property JsonObject weather: JsonObject {

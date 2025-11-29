@@ -8,6 +8,8 @@ Item {
     id: root
 
     readonly property string quoteText: Config.options.background.widgets.clock.quote.text
+    // (broken) for some reason does not take the value from parent 
+    property string displayedQuote: ""
 
     implicitWidth: quoteBox.implicitWidth
     implicitHeight: quoteBox.implicitHeight
@@ -47,7 +49,7 @@ Item {
             StyledText {
                 id: quoteStyledText
                 horizontalAlignment: Text.AlignLeft
-                text: Config.options.background.widgets.clock.quote.text
+                text: displayedQuote
                 color: Appearance.colors.colOnSecondaryContainer
                 font {
                     family: Appearance.font.family.reading

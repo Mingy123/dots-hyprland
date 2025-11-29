@@ -17,6 +17,9 @@ AbstractBackgroundWidget {
     implicitWidth: contentColumn.implicitWidth
 
     readonly property string clockStyle: Config.options.background.widgets.clock.style
+    // `displayedQuote` can be provided by the parent (Background.qml per-monitor `bgRoot`)
+    // or fall back to a local random selection when not provided.
+    property string displayedQuote: "temp"
     readonly property bool forceCenter: (GlobalStates.screenLocked && Config.options.lock.centerClock)
     readonly property bool shouldShow: (!Config.options.background.widgets.clock.showOnlyWhenLocked || GlobalStates.screenLocked)
     property bool wallpaperSafetyTriggered: false
@@ -51,7 +54,7 @@ AbstractBackgroundWidget {
                 FadeLoader {
                     anchors.horizontalCenter: parent.horizontalCenter
                     shown: Config.options.background.widgets.clock.quote.enable && Config.options.background.widgets.clock.quote.text !== ""
-                    sourceComponent: CookieQuote {}
+                    sourceComponent: CookieQuote { displayedQuote: displayedQuote }
                 }
             }
         }
@@ -84,7 +87,7 @@ AbstractBackgroundWidget {
                     color: root.colText
                     style: Text.Raised
                     styleColor: Appearance.colors.colShadow
-                    text: Config.options.background.widgets.clock.quote.text
+                    text: displayedQuote
                 }
             }
         }

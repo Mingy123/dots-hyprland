@@ -38,6 +38,25 @@ Variants {
         property int firstWorkspaceId: relevantWindows[0]?.workspace.id || 1
         property int lastWorkspaceId: relevantWindows[relevantWindows.length - 1]?.workspace.id || 10
         // Wallpaper
+        // Displayed quote for this monitor (chosen once per monitor so multi-monitor instances share it)
+        readonly property string displayedQuote: (function() {
+            var quotes = Config.options.background.widgets.clock.quote.textList || [];
+            var lines = [];
+            
+            // If quotes array exists and has items, use it
+            if (quotes.length > 0) {
+                lines = quotes.filter(function(q) { return q.trim().length > 0; });
+            } else {
+                // Otherwise fall back to splitting text by newlines
+                var text = Config.options.background.widgets.clock.quote.text || "";
+                lines = text.split(/\r?\n/).map(function(l) { return l.trim(); }).filter(function(l) { return l.length > 0 });
+            }
+            
+            if (lines.length === 0) return "";
+            // Choose the quote randomly
+            var randomIndex = Math.floor(Math.random() * lines.length);
+            return lines[randomIndex];
+        })()
         property bool wallpaperIsVideo: Config.options.background.wallpaperPath.endsWith(".mp4") || Config.options.background.wallpaperPath.endsWith(".webm") || Config.options.background.wallpaperPath.endsWith(".mkv") || Config.options.background.wallpaperPath.endsWith(".avi") || Config.options.background.wallpaperPath.endsWith(".mov")
         property string wallpaperPath: wallpaperIsVideo ? Config.options.background.thumbnailPath : Config.options.background.wallpaperPath
         property bool wallpaperSafetyTriggered: {
@@ -294,6 +313,7 @@ Variants {
                         scaledScreenHeight: bgRoot.screen.height / bgRoot.effectiveWallpaperScale
                         wallpaperScale: bgRoot.effectiveWallpaperScale
                         wallpaperSafetyTriggered: bgRoot.wallpaperSafetyTriggered
+                        displayedQuote: bgRoot.displayedQuote
                     }
                 }
             }

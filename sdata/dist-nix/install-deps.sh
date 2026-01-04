@@ -11,51 +11,6 @@ function vianix-warning(){
   printf "${STY_RST}"
   pause
 }
-function install_cmds(){
-  case $OS_GROUP_ID in
-    "arch")
-      local pkgs=()
-      for cmd in "$@";do
-        # For package name which is not cmd name, use "case" syntax to replace
-        pkgs+=($cmd)
-      done
-      x sudo pacman -Syu
-      x sudo pacman -S --noconfirm --needed "${pkgs[@]}"
-      ;;
-    "debian")
-      local pkgs=()
-      for cmd in "$@";do
-        # For package name which is not cmd name, use "case" syntax to replace
-        pkgs+=($cmd)
-      done
-      x sudo apt update -y
-      x sudo apt install -y "${pkgs[@]}"
-      ;;
-    "fedora")
-      local pkgs=()
-      for cmd in "$@";do
-        # For package name which is not cmd name, use "case" syntax to replace
-        pkgs+=($cmd)
-      done
-      x sudo dnf install -y "${pkgs[@]}"
-      ;;
-    "suse")
-      local pkgs=()
-      for cmd in "$@";do
-        # For package name which is not cmd name, use "case" syntax to replace
-        pkgs+=($cmd)
-      done
-      x sudo zypper refresh
-      x sudo zypper -n install "${pkgs[@]}"
-      ;;
-    *)
-      printf "WARNING\n"
-      printf "No method found to install package providing the commands:\n"
-      printf "  $@\n"
-      printf "Please install by yourself.\n"
-      ;;
-  esac
-}
 function install_nix(){
   # https://github.com/NixOS/experimental-nix-installer
   local cmd=nix
@@ -77,8 +32,8 @@ function install_home-manager(){
   try source $HOME/.nix-profile/etc/profile.d/hm-session-vars.sh
   command -v $cmd && return
 
-  x nix-channel --add https://nixos.org/channels/nixos-25.05 nixpkgs-home
-  x nix-channel --add https://github.com/nix-community/home-manager/archive/release-25.05.tar.gz home-manager
+  x nix-channel --add https://nixos.org/channels/nixos-25.11 nixpkgs-home
+  x nix-channel --add https://github.com/nix-community/home-manager/archive/release-25.11.tar.gz home-manager
   x nix-channel --update
   x env NIX_PATH="nixpkgs=$HOME/.nix-defexpr/channels/nixpkgs-home" nix-shell '<home-manager>' -A install
 
@@ -101,6 +56,7 @@ function hm_deps(){
   x home-manager switch --flake .#illogical_impulse \
     --extra-experimental-features nix-command \
     --extra-experimental-features flakes
+  x sudo /nix/store/*-non-nixos-gpu/bin/non-nixos-gpu-setup
   cd $REPO_ROOT
   x git rm -f "${SETUP_USERNAME_NIXFILE}"
 }
@@ -110,18 +66,8 @@ function hm_deps(){
 
 vianix-warning
 
-NOT_FOUND_CMDS=()
 TEST_CMDS=(curl fish swaylock gnome-keyring)
-for cmd in "${TEST_CMDS[@]}"; do
-  if ! command -v $cmd >/dev/null 2>&1;then
-    NOT_FOUND_CMDS+=($cmd)
-  fi
-done
-if [[ ${#NOT_FOUND_CMDS[@]} -gt 0 ]]; then
-  echo -e "${STY_YELLOW}[$0]: Not found: ${NOT_FOUND_CMDS[*]}.${STY_RST}"
-  showfun install_cmds
-  v install_cmds "${NOT_FOUND_CMDS[@]}"
-fi
+ensure_cmds "${TEST_CMDS[@]}"
 
 if ! command -v nix >/dev/null 2>&1;then
   echo -e "${STY_YELLOW}[$0]: \"nix\" not found.${STY_RST}"

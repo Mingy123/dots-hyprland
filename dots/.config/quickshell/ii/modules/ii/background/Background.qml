@@ -40,6 +40,25 @@ Variants {
         property int workspaceChunkSize: Config?.options.bar.workspaces.shown ?? 10
         property int totalWorkspaces: Math.ceil(lastWorkspaceId / workspaceChunkSize) * workspaceChunkSize
         // Wallpaper
+        // Displayed quote for this monitor (chosen once per monitor so multi-monitor instances share it)
+        readonly property string displayedQuote: (function() {
+            var quotes = Config.options.background.widgets.clock.quote.textList || [];
+            var lines = [];
+
+            // If quotes array exists and has items, use it
+            if (quotes.length > 0) {
+                lines = quotes.filter(function(q) { return q.trim().length > 0; });
+            } else {
+                // Otherwise fall back to splitting text by newlines
+                var text = Config.options.background.widgets.clock.quote.text || "";
+                lines = text.split(/\r?\n/).map(function(l) { return l.trim(); }).filter(function(l) { return l.length > 0 });
+            }
+
+            if (lines.length === 0) return "";
+            // Choose the quote randomly
+            var randomIndex = Math.floor(Math.random() * lines.length);
+            return lines[randomIndex];
+        })()
         property bool wallpaperIsVideo: Config.options.background.wallpaperPath.endsWith(".mp4") || Config.options.background.wallpaperPath.endsWith(".webm") || Config.options.background.wallpaperPath.endsWith(".mkv") || Config.options.background.wallpaperPath.endsWith(".avi") || Config.options.background.wallpaperPath.endsWith(".mov")
         property string wallpaperPath: wallpaperIsVideo ? Config.options.background.thumbnailPath : Config.options.background.wallpaperPath
         property bool wallpaperSafetyTriggered: {
@@ -136,6 +155,8 @@ Variants {
                 smooth: false
 
                 property int workspaceIndex: (bgRoot.monitor.activeWorkspace?.id ?? 1) - 1
+                property int chunkSize: Config?.options.bar.workspaces.shown ?? 10;
+                property int realIndex: workspaceIndex % chunkSize;
                 property real middleFraction: 0.5
                 property real fraction: {
                     // 0 - start of the picture
@@ -143,7 +164,7 @@ Variants {
                     if (bgRoot.totalWorkspaces <= 1) {
                         return middleFraction;
                     }
-                    return Math.max(0, Math.min(1, workspaceIndex / (bgRoot.totalWorkspaces - 1)));
+                    return Math.max(0, Math.min(1, realIndex / (chunkSize - 1)));
                 }
 
                 property real usedFractionX: {
@@ -184,13 +205,13 @@ Variants {
                 fillMode: Image.PreserveAspectCrop
                 Behavior on x {
                     NumberAnimation {
-                        duration: 600
+                        duration: 250
                         easing.type: Easing.OutCubic
                     }
                 }
                 Behavior on y {
                     NumberAnimation {
-                        duration: 600
+                        duration: 250
                         easing.type: Easing.OutCubic
                     }
                 }
@@ -278,6 +299,7 @@ Variants {
                         scaledScreenHeight: bgRoot.screen.height
                         wallpaperScale: 1
                         wallpaperSafetyTriggered: bgRoot.wallpaperSafetyTriggered
+                        displayedQuote: bgRoot.displayedQuote
                     }
                 }
             }

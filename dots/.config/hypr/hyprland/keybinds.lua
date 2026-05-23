@@ -151,7 +151,7 @@ hl.bind("SUPER + ALT + M", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_SOURCE@ togg
 hl.bind("SUPER + mouse:272", hl.dsp.window.drag(), { mouse = true, description = "Window: Move" })
 hl.bind("SUPER + mouse:274", hl.dsp.window.drag(), { mouse = true })
 hl.bind("SUPER + mouse:273", hl.dsp.window.resize(), { mouse = true, description = "Window: Resize" })
---#/# bind = SUPER + ←/↑/→/↓,, -- Focus in direction
+--#/# bind = SUPER + H/J/K/L,, -- Focus in direction
 for i = 1, 4 do
     local arrowkey = { "H", "L", "K", "J" }
     local focusdir = { "l", "r", "u", "d" }
@@ -163,7 +163,7 @@ for i = 1, 2 do
     local focusdir = { "l", "r" }
     hl.bind("SUPER + " .. arrowkey[i], hl.dsp.focus({ direction = focusdir[i] }))
 end
---#/# bind = SUPER + SHIFT, ←/↑/→/↓,, -- Move in direction
+--#/# bind = SUPER + SHIFT, H/J/K/L,, -- Move in direction
 for i = 1, 4 do
     local arrowkey = { "H", "L", "K", "J" }
     local focusdir = { "l", "r", "u", "d" }
@@ -200,13 +200,6 @@ for i = 1, 10 do
         hl.dispatch(hl.dsp.window.move({ workspace = workspace_in_group(i), follow = false }))
     end, { description = "Window: Send to workspace " .. i })
 end
---# We also use raw keycodes because some keyboard layouts register number keys as different chars. The codes can be verified with `wev`
-for i = 1, 10 do
-    local numberkey = { 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 }
-    hl.bind("SUPER + SHIFT + code:" .. numberkey[i], function()
-        hl.dispatch(hl.dsp.window.move({ workspace = workspace_in_group(i), follow = false }))
-    end)
-end
 --# keypad numbers
 for i = 1, 10 do
     local numpadkey = { 87, 88, 89, 83, 84, 85, 79, 80, 81, 90 }
@@ -214,6 +207,15 @@ for i = 1, 10 do
         hl.dispatch(hl.dsp.window.move({ workspace = workspace_in_group(i), follow = false }))
     end)
 end
+
+
+for i = 1, 4 do
+    local arrowkey = { "LEFT", "RIGHT", "UP", "DOWN" }
+    local focusdir = { "r-1", "r+1", "r+2", "r-2" }
+    hl.bind("SUPER + SHIFT + " .. arrowkey[i], hl.dsp.window.move({ workspace = focusdir[i], follow = true }),
+        { description = "Window: Move " .. arrowkey[i] })
+end
+
 
 --# #/# bind = SUPER+SHIFT, Scroll ↑/↓,, -- Send to workspace left/right
 for i = 1, 4 do

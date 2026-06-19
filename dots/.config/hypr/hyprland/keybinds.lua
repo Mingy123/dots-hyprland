@@ -135,6 +135,9 @@ hl.bind("SUPER + SHIFT + B", hl.dsp.exec_cmd("playerctl previous"),
     { locked = true, description = "Media: Previous track" })
 hl.bind("SUPER + SHIFT + P", hl.dsp.exec_cmd("playerctl play-pause"),
     { locked = true, description = "Media: Play/pause media" })
+hl.bind("SUPER + ALT + SHIFT + P", hl.dsp.exec_cmd("playerctl play-pause"),
+    { locked = true, description = "Media: Play/pause media" })
+hl.bind("SUPER + ALT + SHIFT + 0", hl.dsp.exec_cmd("playerctl position 0"), { locked = true })
 hl.bind("XF86AudioPlay", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
 hl.bind("XF86AudioPause", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
 hl.bind("XF86AudioMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_SINK@ toggle"), { locked = true })

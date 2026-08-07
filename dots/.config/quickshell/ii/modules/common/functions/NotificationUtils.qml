@@ -92,7 +92,7 @@ Singleton {
         if (appName) {
             const lowerApp = appName.toLowerCase()
             const chromiumBrowsers = [
-                "brave", "chrome", "chromium", "vivaldi", "opera", "microsoft edge"
+                "brave-origin", "brave", "chrome", "chromium", "vivaldi", "opera", "microsoft edge"
             ]
 
             if (chromiumBrowsers.some(name => lowerApp.includes(name))) {

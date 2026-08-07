@@ -1,14 +1,21 @@
 -- MONITOR CONFIG
 hl.monitor({
-    output = "DP-2",
-    mode = "highres",
+    output = "DP-1",
+    mode = "2560x1440@143.97Hz",
     position = "0x0",
     scale = "1"
 })
 hl.monitor({
+    output = "DP-2",
+    transform = 1,
+    mode = "2560x1440@143.97Hz",
+    position = "-1440x-835",
+    scale = "1"
+})
+hl.monitor({
     output = "HDMI-A-1",
-    mode = "highres",
-    position = "-1920x365",
+    mode = "2560x1440@99.97Hz",
+    position = "0x-1440",
     scale = "1"
 })
 

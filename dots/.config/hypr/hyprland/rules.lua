@@ -40,7 +40,7 @@ hl.window_rule({match = {class = "^(nm-connection-editor)$" },               cen
 hl.window_rule({match = {class = ".*plasmawindowed.*" },                     float = true})
 hl.window_rule({match = {class = "kcm_.*" },                                  float = true})
 hl.window_rule({match = {class = ".*bluedevilwizard" },                      float = true})
-hl.window_rule({match = {class = ".*kde\\.dolphin" },                        size = {"(monitor_w*0.40)", "(monitor_h*0.50)"} })
+hl.window_rule({match = {class = ".*kde\\.dolphin" },                        size = {"1024", "720"} })
 hl.window_rule({match = {class = ".*kde\\.dolphin" },                        float = true})
 hl.window_rule({match = {title = ".*Welcome" },                              float = true})
 hl.window_rule({match = {title = "^(illogical-impulse Settings)$" },         float = true})

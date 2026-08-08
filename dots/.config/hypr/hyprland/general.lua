@@ -14,7 +14,7 @@ hl.monitor({
 })
 hl.monitor({
     output = "HDMI-A-1",
-    mode = "2560x1440@99.97Hz",
+    mode = "2560x1440@60.00Hz",
     position = "0x-1440",
     scale = "1"
 })

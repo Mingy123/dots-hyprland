@@ -183,3 +183,5 @@ hl.window_rule({ match = { float = false, workspace = "f[1]s[false]" }, rounding
 hl.workspace_rule({ workspace = "1", monitor = "DP-1", default = true })
 hl.workspace_rule({ workspace = "11", monitor = "DP-2", default = true })
 hl.workspace_rule({ workspace = "21", monitor = "HDMI-A-1", default = true })
+
+hl.workspace_rule({ workspace = "22", on_created_empty = "brave-origin --new-window https://web.whatsapp.com" })

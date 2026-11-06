@@ -3,13 +3,15 @@ hl.monitor({
     output = "DP-1",
     mode = "2560x1440@143.97Hz",
     position = "0x0",
-    scale = "1"
+    scale = "1",
+    bitdepth = 10,
 })
 hl.monitor({
     output = "DP-2",
     mode = "2560x1440@143.97Hz",
     position = "0x-1440",
-    scale = "1"
+    scale = "1",
+    bitdepth = 10,
 })
 hl.monitor({
     output = "HDMI-A-1",
@@ -125,6 +127,9 @@ hl.config({
         smart_split = false,
         smart_resizing = false
         -- precise_mouse_move = true,
+    },
+    render = {
+        cm_auto_hdr = 0
     },
 })
 -- Curves

@@ -25,3 +25,10 @@ hl.on("hyprland.start", function ()
     hl.exec_cmd("fcitx5")
 
 end)
+
+--hl.workspace_rule({ workspace = "22", on_created_empty = "brave-origin --new-window https://web.whatsapp.com" })
+hl.on("workspace.created", function (ws)
+    if not ws.is_empty then return end
+    if ws.id ~= 22 then return end
+    hl.exec_cmd("brave-origin --new-window https://web.whatsapp.com", { workspace = ws.name .. " silent"})
+end)
